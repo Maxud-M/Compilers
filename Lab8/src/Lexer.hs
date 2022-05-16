@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lexer(getTokens, Position, Fragment, Token, Tag) where 
+module Lexer where 
 
 
 import qualified Data.Text as T
@@ -12,8 +12,8 @@ import Control.Monad (unless, when)
 
 
 
-data Tag = LEFT_ANGLE | RIGHT_ANGLE | LEFT_BRACE | RIGHT_BRACE | Term Char | NonTerm Char | EOF deriving (Eq)
-data Token = Token {frag:: Fragment, tag:: Tag}
+data Tag = LEFT_ANGLE | RIGHT_ANGLE | LEFT_BRACE | RIGHT_BRACE | Term | NonTerm | Eps | EOF deriving (Eq)
+data Token = Token {frag:: Fragment, tag:: Tag, image:: T.Text}
 data Position = Position {index:: Int, line:: Int, column:: Int}
 data Fragment = Fragment {starting:: Position, following:: Position}
 data LexerState = LexerState {program:: T.Text, pos:: Position}
@@ -28,16 +28,7 @@ instance Show Position where
 instance Show Fragment where
     show (Fragment begin end) = show begin ++ "-" ++ show end
 
-instance Show Tag where 
-    show LEFT_ANGLE = "<"
-    show RIGHT_ANGLE = ">"
-    show LEFT_BRACE = "{"
-    show RIGHT_BRACE = "}"
-    show (Term a) = [a]
-    show (NonTerm a) = [a]
-    show EOF = "EOF"
-instance Show Token where 
-    show token = show $ tag token 
+ 
 
 whiteSpace :: [Char]
 whiteSpace = ['\t', '\n', ' ', '\r']
@@ -74,8 +65,8 @@ getTagFromChar '{' = return LEFT_BRACE
 getTagFromChar '}' = return RIGHT_BRACE
 getTagFromChar char = do
                     if isUpper char 
-                        then return $ NonTerm char
-                        else return $ Term char 
+                        then return $ NonTerm
+                        else return $ Term 
 
 
 getToken:: State LexerState Token
@@ -91,11 +82,11 @@ getToken = do
             next
             newState <- get
             let end = pos newState
-            return Token {tag = tag, frag = Fragment{starting = begin, following = end}}
+            return Token {image = T.pack [s], tag = tag, frag = Fragment{starting = begin, following = end}}
         else do
             state <- get
             let end = pos state
-            return Token {tag = EOF, frag = Fragment{starting = end, following = end}}
+            return Token {image = "EOF", tag = EOF, frag = Fragment{starting = end, following = end}}
 
 
 
