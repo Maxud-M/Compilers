@@ -147,7 +147,9 @@ parseA = do
             nextToken
             state1 <- get 
             if tag (head state1) == RIGHT_ANGLE
-                then return $ Leaf Token{tag = Eps, image = "eps", frag = frag token}
+                then do
+                    nextToken
+                    return $ Leaf Token{tag = Eps, image = "eps", frag = frag token}
                 else do
                     concat <- parseConcat
                     nextToken
