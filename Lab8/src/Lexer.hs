@@ -50,7 +50,7 @@ getAllTokens::State LexerState [Token]
 getAllTokens = do 
     token <- getToken
     if tag token == EOF 
-        then return []
+        then return [token]
             else do
                 tokens <- getAllTokens
                 return $ token : tokens  

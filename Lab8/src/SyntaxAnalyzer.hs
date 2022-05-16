@@ -24,7 +24,7 @@ printTree (Root rules) = do
                     let r = head rules
                     let rs = tail rules
                     rImage <- printTree r
-                    rsImage <- printTree (Root rules)
+                    rsImage <- printTree (Root rs)
                     return $ T.concat [rImage, rsImage]
 printTree (Rule nonTerm rule) = do
                             count <- get
@@ -60,20 +60,20 @@ printTree (Concat left right) = do
                             let edge1 = T.concat ["n", T.pack $ show count, "->n", T.pack $ show(count + 1), "\n"]
                             newCount <- get
                             r <- printTree right 
-                            let edge2 = T.concat ["n", T.pack $ show count, "->", "n", T.pack $ show newCount, "\n"]
+                            let edge2 = T.concat ["n", T.pack $ show count, "->n", T.pack $ show newCount, "\n"]
                             return $ T.concat [vertex, edge1, edge2, l, r]
 
 printTree (Star tree) = do
                     count <- get
                     let vertex = T.pack $ "n" ++ show count ++ " [label=\"Star\"]\n"
                     inc
-                    let edge = T.pack $ "n" ++ show count ++ "->" ++ "n" ++ show (count + 1)
+                    let edge = T.pack $ "n" ++ show count ++ "->n" ++ show (count + 1) ++ "\n"
                     t <- printTree tree
                     return $ T.concat [vertex, edge, t]
 
 printTree (Leaf token) = do
                     count <- get
-                    let res = T.concat ["n", T.pack $ show count, " [label=\"]", image token, "\"]\n"]
+                    let res = T.concat ["n", T.pack $ show count, " [label=\"", image token, "\"]\n"]
                     inc
                     return res
 
@@ -81,11 +81,13 @@ printTree (Leaf token) = do
 
 printTreeDot::Either T.Text Tree -> T.Text
 printTreeDot (Left text) = text
-printTreeDot (Right tree) = T.concat ["n0 [label=\"S'\"]", evalState (printTree tree) 1]
+printTreeDot (Right tree) = T.concat ["n0 [label=\"S'\"]\n", evalState (printTree tree) 1]
 
 
 
-                    
+check::[Token] -> String
+check list = show tokens
+    where tokens = execState  (runExceptT parseX) list                    
 
 
 
@@ -94,7 +96,7 @@ printTreeDot (Right tree) = T.concat ["n0 [label=\"S'\"]", evalState (printTree 
 
 
 
-data Tree = Leaf Lexer.Token| Root {rules:: [Tree]} | Alt Tree Tree | Concat Tree Tree | Rule Tree Tree | Star Tree
+data Tree = Leaf Lexer.Token | Root {rules:: [Tree]} | Alt Tree Tree | Concat Tree Tree | Rule Tree Tree | Star Tree
 
 
 type EvalMonad = ExceptT T.Text (State [Token]) 
@@ -124,6 +126,7 @@ parseX = do
             n <- parseN
             alt <- parseAlt
             let rule = Rule n alt
+            nextToken
             tree <- parseX
             return $ Root {rules = rule:(rules tree)}
         else if tag token == EOF
@@ -149,7 +152,7 @@ parseA = do
                     concat <- parseConcat
                     nextToken
                     return concat
-        else throwError $ T.pack $ "Unexpected token" ++ show token ++ ", expect <"
+        else throwError $ T.pack $ "Unexpected token " ++ show token ++ ", expect <"
     
 
 
@@ -186,10 +189,10 @@ parseConcat::EvalMonad Tree
 parseConcat = do
             s <- parseS
             state <- get
-            if tag (head state) == RIGHT_BRACE
-                then return s
-                else do Concat s <$> parseConcat
-
+            let token = head state
+            if tag token `elem` [NonTerm, Term, LEFT_ANGLE, LEFT_BRACE]
+                then do Concat s <$> parseConcat
+                else return s
 
 -- A*
 parseAlt::EvalMonad Tree
@@ -215,7 +218,9 @@ parseN = do
     state <- get
     let token = head state 
     if tag token == NonTerm
-        then return $ Leaf token
+        then do
+            nextToken
+            return $ Leaf token
         else throwError $ T.pack $ "Unexpected token " ++ show token ++ ", expect non-terminal"
 
 
@@ -225,7 +230,9 @@ parseT = do
     state <- get
     let token = head state
     if tag token == Term
-        then return $ Leaf token
+        then do
+            nextToken
+            return $ Leaf token
         else throwError $ T.pack $ "Unexpected token " ++ (show token) ++ ", expect terminal"
 
 
