@@ -21,14 +21,15 @@ data LexerState = LexerState {program:: T.Text, pos:: Position}
 
 
 instance Show Position where 
-    show (Position index line column) = "(" ++ show(line) ++ ", " ++ show(column) ++ ", " ++ show(index) ++ ")"
+    show (Position index line column) = "(" ++ show(line) ++ ", " ++ show(column) ++ ")"
     
 
 
 instance Show Fragment where
     show (Fragment begin end) = show begin ++ "-" ++ show end
 
- 
+instance Show Token where 
+    show token = T.unpack (image token) ++ ":" ++ show (frag token) 
 
 whiteSpace :: [Char]
 whiteSpace = ['\t', '\n', ' ', '\r']
