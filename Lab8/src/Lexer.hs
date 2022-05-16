@@ -75,7 +75,8 @@ getToken = do
     skipWhiteSpaces
     eof <- isEof
     if not eof 
-        then do 
+        then do
+            skipComments
             s <- curCharacter
             tag <- getTagFromChar s
             state <- get
@@ -116,6 +117,27 @@ next = do
         }
     
 
+skipComment::State LexerState ()
+skipComment = do
+            eof <- isEof
+            if not eof 
+                then do
+                    cur <- curCharacter
+                    if (cur == '\n') 
+                        then do
+                            next
+                            skipComments
+                        else do next
+                                skipComment
+                else return ()
+skipComments:: State LexerState ()
+skipComments = do
+            cur <- curCharacter
+            if cur == '\''
+                then do
+                    next
+                    skipComment
+                else return () 
 
 curCharacter:: State LexerState Char
 curCharacter = do

@@ -23,6 +23,6 @@ main = do
     case tree of 
         (Left text) -> TIO.putStrLn text
         (Right root) -> print $ buildFirst root
-    --let treeDot = printTreeDot tree
-    --TIO.putStrLn treeDot
+    let treeDot = printTreeDot tree
+    TIO.putStrLn treeDot
 
