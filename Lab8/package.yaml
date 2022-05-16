@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - text
 - mtl
+- containers
 
 library:
   source-dirs: src
@@ -39,6 +40,7 @@ executables:
     - Lab8
     - text
     - mtl
+    - containers
 tests:
   Lab8-test:
     main:                Spec.hs
