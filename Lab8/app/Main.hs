@@ -1,8 +1,9 @@
 module Main where
-
+import Control.Monad.State
 import Lexer
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
+import SyntaxAnalyzer
 import System.Environment (getArgs)
 main :: IO ()
 main = do 
@@ -12,3 +13,8 @@ main = do
     TIO.putStrLn program    
     let tokens = Lexer.getTokens program
     print tokens
+    putStrLn "\n\n\n"
+    let tree = getSyntaxTree tokens
+    let treeDot = printTreeDot tree
+    TIO.putStrLn treeDot
+
