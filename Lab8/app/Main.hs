@@ -22,7 +22,7 @@ main = do
     let tree = getSyntaxTree tokens
     case tree of 
         (Left text) -> TIO.putStrLn text
-        (Right root) -> print $ buildFirst root
-    let treeDot = printTreeDot tree
-    TIO.putStrLn treeDot
+        (Right root) -> TIO.putStrLn $ printFirst $ buildFirst root
+--    let treeDot = printTreeDot tree
+ --   TIO.putStrLn treeDot
 

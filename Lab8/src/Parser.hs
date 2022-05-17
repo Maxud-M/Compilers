@@ -13,6 +13,18 @@ import Control.Monad.State
 
 
 
+printList::[T.Text] -> T.Text
+printList [] = ""
+printList (x:[]) = x
+printList (x:xs) = T.concat [x, ", ", printList xs]
+
+printFirstSet::(T.Text, [T.Text]) -> T.Text
+printFirstSet (nonTerm, first) = T.concat ["First(", nonTerm, ") = {", printList first, "}\n"]  
+
+printFirst:: Map.Map T.Text [T.Text] -> T.Text
+printFirst m = T.concat $ map (printFirstSet) (Map.toList m) 
+
+
 buildFirst:: Tree -> Map.Map T.Text [T.Text]
 buildFirst tree = execState (parseRoot tree) Map.empty
 
