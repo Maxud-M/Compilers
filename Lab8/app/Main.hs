@@ -17,12 +17,12 @@ main = do
     program <- TIO.readFile filename
     TIO.putStrLn program    
     let tokens = Lexer.getTokens program
-    print tokens
+    --print tokens
     putStrLn "\n\n\n"
     let tree = getSyntaxTree tokens
     case tree of 
         (Left text) -> TIO.putStrLn text
         (Right root) -> TIO.putStrLn $ printFirst $ buildFirst root
---    let treeDot = printTreeDot tree
- --   TIO.putStrLn treeDot
+    let treeDot = printTreeDot tree
+    TIO.putStrLn treeDot
 
