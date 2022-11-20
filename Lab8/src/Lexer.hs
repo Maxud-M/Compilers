@@ -159,14 +159,3 @@ skipWhiteSpaces = do
         when (curChar `elem` whiteSpace) $ do 
             next
             skipWhiteSpaces
-
-
-
-
-
-    
-    
-
-
-
-
